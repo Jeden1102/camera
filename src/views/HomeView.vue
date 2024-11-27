@@ -33,12 +33,22 @@
 </template>
 <script lang="ts">
 import Camera from "simple-vue-camera";
-import { defineComponent, ref } from "vue";
+import { defineComponent, onMounted, ref } from "vue";
 
 export default defineComponent({
   setup() {
     const camera = ref<InstanceType<typeof Camera>>();
     const img = ref();
+
+    const activeDevice = ref<number>(0);
+
+    const devicesIds = ref<string[]>([]);
+
+    const getDevices = async () => {
+      const devices = await camera.value?.devices(["videoinput"]);
+      if (!devices) return;
+      devicesIds.value = devices.map((d) => d.deviceId);
+    };
 
     const snapshot = async () => {
       const blob = await camera.value?.snapshot();
@@ -54,9 +64,18 @@ export default defineComponent({
     };
 
     const changeCamera = async () => {
-      await camera.value?.changeCamera(camera.value.currentDeviceID() || "");
-      console.log(camera.value?.currentDeviceID());
+      console.log(devicesIds.value);
+      if (activeDevice.value === 0) {
+        activeDevice.value = 1;
+      } else {
+        activeDevice.value = 0;
+      }
+      await camera.value?.changeCamera(devicesIds.value[activeDevice.value]);
     };
+
+    onMounted(async () => {
+      getDevices();
+    });
 
     return {
       camera,
@@ -64,6 +83,7 @@ export default defineComponent({
       img,
       retake,
       changeCamera,
+      devicesIds,
     };
   },
 });
