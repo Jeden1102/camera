@@ -42,6 +42,7 @@ export default defineComponent({
 
     const snapshot = async () => {
       const blob = await camera.value?.snapshot();
+      if (!blob) return;
 
       const url = URL.createObjectURL(blob);
 
@@ -53,7 +54,7 @@ export default defineComponent({
     };
 
     const changeCamera = async () => {
-      await camera.value?.changeCamera(camera.value.currentDeviceID());
+      await camera.value?.changeCamera(camera.value.currentDeviceID() || "");
       console.log(camera.value?.currentDeviceID());
     };
 
